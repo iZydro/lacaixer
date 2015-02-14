@@ -18,11 +18,13 @@ my_plans = None
 
 config = None
 
+
 def print_add_text(message):
     print(message)
     return message + "\n"
 
-def send_mail(text):
+
+def send_mail(mail_body):
 
     import smtplib
 
@@ -41,35 +43,34 @@ password: your_secret_password
 
 '''
     try:
-        from_addr = config["Mailer"]["from"]
-        to_addr = config["Mailer"]["to"]
+        from_address = config["Mailer"]["from"]
+        to_address = config["Mailer"]["to"]
         username = config["Mailer"]["username"]
         password = config["Mailer"]["password"]
-
-        if True: return
 
         from email.mime.multipart import MIMEMultipart
         from email.mime.text import MIMEText
 
-        msg=MIMEMultipart()
-        msg['From'] = from_addr
-        msg['To'] = to_addr
-        msg['Subject']='Planes'
-        msg.attach(MIMEText(text))
+        msg = MIMEMultipart()
+        msg['From'] = from_address
+        msg['To'] = to_address
+        msg['Subject'] = 'Planes'
+        msg.attach(MIMEText(mail_body))
 
         # The actual mail send
         server = smtplib.SMTP_SSL('smtp.gmail.com:465')
-        server.login(username,password)
+        server.login(username, password)
         server.send_message(msg)
         server.quit()
     except Exception as e:
         print("Could not send mail because of that:")
         print(e)
 
-def get_price(id_plan):
+
+def get_price(stock_plan):
     headers = {}
     params = {}
-    url = "https://portal4.lacaixa.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(id_plan)
+    url = "https://portal4.lacaixa.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(stock_plan)
 
     https_sslv3_handler = urllib.request.HTTPSHandler(context=ssl.SSLContext(ssl.PROTOCOL_SSLv3))
     opener = urllib.request.build_opener(https_sslv3_handler)
@@ -85,12 +86,12 @@ def get_price(id_plan):
     row = datos_generales.findAll("tr")[3]
     all_date_string = row.findAll("th")[0].contents[0]
     date_string = all_date_string.split("[")[1].split("]")[0]
-    date = datetime.datetime.strptime(date_string + " UTC", "%d-%m-%Y %Z")
+    stock_date = datetime.datetime.strptime(date_string + " UTC", "%d-%m-%Y %Z")
 
-    value = row.findAll("td")[0].string
-    number = float(value.split(" ")[0].replace(",", "."))
+    stock_value = row.findAll("td")[0].string
+    stock_number = float(stock_value.split(" ")[0].replace(",", "."))
 
-    return date, number
+    return stock_date, stock_number
 
 
 if __name__ == "__main__":
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     files = config.read("config.ini")
     if len(files) == 0:
         print("Could not read config file")
-        exit (1)
+        exit(1)
 
     '''
     Fill in the plan array with data read form the ini file, as follows:
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     c.execute('create table if not exists plans (id string, timestamp date, parts real) ')
     conn.commit()
 
-    text = "Cotización de planes\n"
+    text = "Plans value\n"
 
     total = 0.0
     new_data = False
@@ -162,10 +163,10 @@ if __name__ == "__main__":
 
     results = c.execute("select * from plans order by timestamp desc, id")
     for result in results.fetchall():
-        id = result[0]
+        id_plan = result[0]
         date = datetime.datetime.fromtimestamp(result[1], tz=pytz.utc)
         parts = result[2]
-        print(date, id, parts)
+        print(date, id_plan, parts)
 
     conn.close()
 
