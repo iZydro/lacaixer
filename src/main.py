@@ -72,9 +72,9 @@ def get_price(stock_plan):
     params = {}
     url = "https://portal4.lacaixa.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(stock_plan)
 
-    https_sslv3_handler = urllib.request.HTTPSHandler(context=ssl.SSLContext(ssl.PROTOCOL_TLSv1))
-    opener = urllib.request.build_opener(https_sslv3_handler)
-    urllib.request.install_opener(opener)
+    #https_sslv3_handler = urllib.request.HTTPSHandler(context=ssl.SSLContext(ssl.PROTOCOL_TLSv1))
+    #opener = urllib.request.build_opener(https_sslv3_handler)
+    #urllib.request.install_opener(opener)
 
     request = urllib.request.Request(url, urllib.parse.urlencode(params).encode('utf-8'), headers)
     resp = urllib.request.urlopen(request)
