@@ -8,6 +8,7 @@ import pytz
 import ssl
 import sqlite3
 import configparser
+import plotly.plotly as py      # Every function in this module will communicate with an external plotly server
 
 from bs4 import BeautifulSoup
 
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     c.execute('create table if not exists plans (id string, timestamp date, parts real) ')
     conn.commit()
 
-    text = "Plans value\n"
+    text = ""
 
     total = 0.0
     new_data = False
@@ -147,7 +148,7 @@ if __name__ == "__main__":
 
         plan_value = plan["parts"]*value
         info = str(date) + " -> " + plan["name"] + " : " + str(value) + " = " + money.format(plan_value)
-        text += print_add_text(info)
+        text += info + "\n"
         total += plan_value
 
         result = c.execute("select * from plans where id=? and timestamp=?", (plan["id"], ts))
@@ -159,7 +160,8 @@ if __name__ == "__main__":
             conn.commit()
             new_data = True
 
-    text += print_add_text("Total value: " + money.format(total))
+    text = "Total value: " + money.format(total) + "\n" + text
+    print(text)
 
     results = c.execute("select * from plans order by timestamp desc, id")
     for result in results.fetchall():
@@ -172,3 +174,33 @@ if __name__ == "__main__":
 
     if new_data:
         send_mail(text)
+
+        x = []
+        y = []
+
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        results = c.execute("select id, timestamp, sum(parts) from plans group by timestamp order by timestamp desc, id")
+        for result in results.fetchall():
+            id_plan = result[0]
+            date = datetime.datetime.fromtimestamp(result[1], tz=pytz.utc)
+            parts = result[2]
+            print(date, id_plan, parts)
+            x.append(date)
+            y.append(parts)
+
+        conn.close()
+
+        try:
+            py.sign_in(config["plotly"]["plotly_username"], config["plotly"]["plotly_api_key"])
+
+            py.plot({                      # use `py.iplot` inside the ipython notebook
+                "data": [{"x": x, "y": y}],
+                "layout": {
+                    "title": "hello world"
+                }
+            }, filename='pensions_graph',      # name of the file as saved in your plotly account
+               privacy='public')            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
+        except Exception as e:
+            print("Could not send plot because of that:")
+            print(e)
