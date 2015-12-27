@@ -197,7 +197,7 @@ if __name__ == "__main__":
             py.plot({                      # use `py.iplot` inside the ipython notebook
                 "data": [{"x": x, "y": y}],
                 "layout": {
-                    "title": "hello world"
+                    "title": "Plans"
                 }
             }, filename='pensions_graph',      # name of the file as saved in your plotly account
                privacy='public')            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
