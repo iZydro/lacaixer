@@ -25,9 +25,11 @@ def print_add_text(message):
     return message + "\n"
 
 
-def send_mail(mail_body):
+def send_mail(mail_body, image_name=""):
 
     import smtplib
+    import os
+    from email.mime.image import MIMEImage
 
     '''
 A config.ini file must exist in order to send mails.
@@ -57,6 +59,11 @@ password: your_secret_password
         msg['To'] = to_address
         msg['Subject'] = 'Planes'
         msg.attach(MIMEText(mail_body))
+
+        if image_name != "":
+            img_data = open(image_name, 'rb').read()
+            image = MIMEImage(img_data, name=os.path.basename(image_name))
+            msg.attach(image)
 
         # The actual mail send
         server = smtplib.SMTP_SSL('smtp.gmail.com:465')
@@ -147,7 +154,7 @@ if __name__ == "__main__":
         print(ts)
 
         plan_value = plan["parts"]*value
-        info = str(date) + " -> " + plan["name"] + " : " + str(value) + " = " + money.format(plan_value)
+        info = str(date)[:10] + " -> " + plan["name"] + " : " + str(value) + " = " + money.format(plan_value)
         text += info + "\n"
         total += plan_value
 
@@ -173,7 +180,8 @@ if __name__ == "__main__":
     conn.close()
 
     if new_data:
-        send_mail(text)
+
+        image_created = ""
 
         x = []
         y = []
@@ -200,7 +208,13 @@ if __name__ == "__main__":
                     "title": "Plans"
                 }
             }, filename='pensions_graph',      # name of the file as saved in your plotly account
-               privacy='public')            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
+            sharing='secret',            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
+            auto_open=False)
+
+            py.image.save_as({"data": [{"x": x, "y": y}]}, "pensions_graph.png")
+            image_created = "pensions_graph.png"
         except Exception as e:
             print("Could not send plot because of that:")
             print(e)
+
+        send_mail(text, image_created)
