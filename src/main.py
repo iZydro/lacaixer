@@ -208,7 +208,7 @@ if __name__ == "__main__":
                     "title": "Plans"
                 }
             }, filename='pensions_graph',      # name of the file as saved in your plotly account
-            sharing='secret',            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
+            sharing='public',            # 'public' | 'private' | 'secret': Learn more: https://plot.ly/python/privacy
             auto_open=False)
 
             py.image.save_as({"data": [{"x": x, "y": y}]}, "pensions_graph.png")
