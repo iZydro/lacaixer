@@ -170,13 +170,14 @@ if __name__ == "__main__":
     text = "Total value: " + money.format(total) + "\n" + text
     print(text)
 
+    '''
     results = c.execute("select * from plans order by timestamp desc, id")
     for result in results.fetchall():
         id_plan = result[0]
         date = datetime.datetime.fromtimestamp(result[1], tz=pytz.utc)
         parts = result[2]
         print(date, id_plan, parts)
-
+'''
     conn.close()
 
     if new_data:
@@ -188,14 +189,16 @@ if __name__ == "__main__":
 
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
-        results = c.execute("select id, timestamp, sum(parts) from plans group by timestamp order by timestamp desc, id")
+        results = c.execute("select id, timestamp, sum(parts), count(id) from plans group by timestamp order by timestamp desc, id")
         for result in results.fetchall():
             id_plan = result[0]
             date = datetime.datetime.fromtimestamp(result[1], tz=pytz.utc)
             parts = result[2]
-            print(date, id_plan, parts)
-            x.append(date)
-            y.append(parts)
+            countid = result[3]
+            if countid == 3:
+                print(date, id_plan, parts)
+                x.append(date)
+                y.append(parts)
 
         conn.close()
 
