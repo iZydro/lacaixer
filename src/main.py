@@ -8,7 +8,7 @@ import pytz
 import ssl
 import sqlite3
 import configparser
-import plotly.plotly as py      # Every function in this module will communicate with an external plotly server
+import chart_studio.plotly as py      # Every function in this module will communicate with an external plotly server
 
 from bs4 import BeautifulSoup
 
@@ -78,7 +78,9 @@ password: your_secret_password
 def get_price(stock_plan):
     headers = {}
     params = {}
-    url = "https://portal4.lacaixa.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(stock_plan)
+    #url = "https://portal4.lacaixa.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(stock_plan)
+    #url = "https://www1.caixabank.es/apl/planes/fichas.index_es.html?PLA_idPla=" + str(stock_plan)
+    url = "https://www1.caixabank.es/apl/planes/fichas.datosFundamentales_es.html?PLA_continuar=continuar&PLA_idPla=" + str(stock_plan)
 
     #https_sslv3_handler = urllib.request.HTTPSHandler(context=ssl.SSLContext(ssl.PROTOCOL_TLSv1))
     #opener = urllib.request.build_opener(https_sslv3_handler)
